@@ -5,6 +5,7 @@ import { DataTable } from "@/components/ui/data-table"
 import { Button } from "@/components/ui/button"
 import { ViewModal } from "@/components/ui/view-modal"
 import { useProducts } from "@/hooks/use-products"
+import { ColumnDef } from "@tanstack/react-table"
 
 interface Product extends Record<string, unknown> {
   id: string;
@@ -14,12 +15,24 @@ interface Product extends Record<string, unknown> {
   stock: number;
 }
 
-const columns: { key: keyof Product; label: string }[] = [
-  { key: "name", label: "Name" },
-  { key: "category", label: "Category" },
-  { key: "price", label: "Price" },
-  { key: "stock", label: "Stock" },
-];
+const columns: ColumnDef<Product>[] = [
+  {
+    accessorKey: "name",
+    header: "Name",
+  },
+  {
+    accessorKey: "category",
+    header: "Category",
+  },
+  {
+    accessorKey: "price",
+    header: "Price",
+  },
+  {
+    accessorKey: "stock",
+    header: "Stock",
+  },
+]
 
 export default function ProductsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -30,6 +43,18 @@ export default function ProductsPage() {
     setSelectedItem(item)
     setIsModalOpen(true)
   }
+
+  const renderContent = (item: Product | null) => {
+    if (!item) return null;
+    return (
+      <div>
+        <p><strong>Name:</strong> {item.name}</p>
+        <p><strong>Category:</strong> {item.category}</p>
+        <p><strong>Price:</strong> {item.price}</p>
+        <p><strong>Stock:</strong> {item.stock}</p>
+      </div>
+    );
+  };
 
   if (isLoading) return <div>Loading...</div>
   if (error) return <div>Error: {error.message}</div>
@@ -45,13 +70,12 @@ export default function ProductsPage() {
         columns={columns}
         onView={handleView}
       />
-      {selectedItem && (
-        <ViewModal<Product>
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          item={selectedItem}
-        />
-      )}
+      <ViewModal<Product>
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        item={selectedItem}
+        renderContent={renderContent}
+      />
     </div>
   )
 }
